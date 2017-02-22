@@ -1,0 +1,1 @@
+# trik_controller
