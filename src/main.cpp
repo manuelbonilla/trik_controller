@@ -22,11 +22,6 @@ bool cb_enable(trik_controller::enable::Request  &req,
   controller_manager_msgs::SwitchController switch_srv;
   switch_srv.request.start_controllers.push_back(controller_to_use);
   switch_srv.request.stop_controllers.insert(switch_srv.request.stop_controllers.end(), lcld.begin(), lcld.end());
-  // switch_srv.request.stop_controllers.push_back(lcld);
-  // switch_srv.request.stop_controllers.push_back("joint_trajectory_controller");
-  // switch_srv.request.stop_controllers.push_back("stiffness_trajectory_controller");
-  // switch_srv.request.stop_controllers.push_back("damping_trajectory_controller");
-  // switch_srv.request.stop_controllers.push_back("add_torque_trajectory_controller");
   switch_srv.request.strictness = 2;
 
   if (!srv_c_sw.call(switch_srv))
@@ -41,6 +36,7 @@ bool cb_enable(trik_controller::enable::Request  &req,
     std_msgs::Bool msg_ac;
     msg_ac.data = true;
     pub_activate_control.publish(msg_ac);
+    ros::spinOnce();
   }
   return true;
 }
@@ -65,6 +61,7 @@ bool cb_disable(trik_controller::disable::Request  &req,
     std_msgs::Bool msg_ac;
     msg_ac.data = false;
     pub_activate_control.publish(msg_ac);
+    ros::spinOnce();
   }
   return true;
 }
