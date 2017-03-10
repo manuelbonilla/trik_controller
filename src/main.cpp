@@ -84,11 +84,11 @@ int main(int argc, char **argv)
   n.param<std::string>("controller", controller_to_use , "teleoperation_controller_mt_effort");
 
   std::string arm;
-  n.param<std::string>("name_arm", arm , "right_arm");
+  n.param<std::string>("name_arm", arm , "/right_arm");
 
   srv_c_sw = n.serviceClient<controller_manager_msgs::SwitchController>( arm + std::string("/controller_manager/switch_controller"));
   srv_c_l = n.serviceClient<controller_manager_msgs::ListControllers>( arm + std::string("/controller_manager/list_controllers"));
-  pub_activate_control = n.advertise<std_msgs::Bool>( arm + controller_to_use + std::string("/start_controller"), 1);
+  pub_activate_control = n.advertise<std_msgs::Bool>( arm + "/" +controller_to_use + std::string("/start_controller"), 1);
 
   ros::ServiceServer srv_enable = n.advertiseService("enable", cb_enable);
   ros::ServiceServer srv_disable = n.advertiseService("disable", cb_disable);
