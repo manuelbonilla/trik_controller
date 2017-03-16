@@ -1,0 +1,8 @@
+<launch>
+
+	<node name="trik_controller" pkg="trik_controller" type="trik_controller_node" respawn="false" output="screen">
+		<param name="name_controller" type="string" value="teleoperation_controller"/>
+		<param name="name_arm" type="string" value="right_arm"/>
+	</node>
+
+</launch>

@@ -9,7 +9,7 @@
 bool is_enabled_flag;
 ros::ServiceClient srv_c_sw, srv_c_l;
 ros::Publisher pub_activate_control;
-std::string controller_to_use;
+std::string controller;
 
 std::vector<std::string> lcld; // list of controllers loaded by default
 std::vector<std::string> lcsd; // list of controllers stoped by default
@@ -20,7 +20,7 @@ bool cb_enable(trik_controller::enable::Request  &req,
   ROS_INFO("Enabling trik_controller");
 
   controller_manager_msgs::SwitchController switch_srv;
-  switch_srv.request.start_controllers.push_back(controller_to_use);
+  switch_srv.request.start_controllers.push_back(controller);
   switch_srv.request.stop_controllers.insert(switch_srv.request.stop_controllers.end(), lcld.begin(), lcld.end());
   switch_srv.request.strictness = 2;
 
@@ -46,7 +46,7 @@ bool cb_disable(trik_controller::disable::Request  &req,
 {
   ROS_INFO("Disabling trik_controller");
   controller_manager_msgs::SwitchController switch_srv;
-  switch_srv.request.stop_controllers.push_back(controller_to_use);
+  switch_srv.request.stop_controllers.push_back(controller);
   switch_srv.request.start_controllers.insert(switch_srv.request.start_controllers.end(), lcld.begin(), lcld.end());
   switch_srv.request.strictness = 2;
 
@@ -79,20 +79,23 @@ int main(int argc, char **argv)
   is_enabled_flag = false;
   ros::init(argc, argv, "trik_controller");
   ROS_INFO("trik_controller started");
-  ros::NodeHandle n;
+  ros::NodeHandle n("~");
 
-  n.param<std::string>("controller", controller_to_use , "teleoperation_controller_mt_effort");
+  n.param<std::string>("name_controller", controller , "cartesian_impedance_controller");
 
   std::string arm;
-  n.param<std::string>("name_arm", arm , "/right_arm");
+  n.param<std::string>("name_arm", arm , "left_arm");
 
-  srv_c_sw = n.serviceClient<controller_manager_msgs::SwitchController>( arm + std::string("/controller_manager/switch_controller"));
-  srv_c_l = n.serviceClient<controller_manager_msgs::ListControllers>( arm + std::string("/controller_manager/list_controllers"));
-  pub_activate_control = n.advertise<std_msgs::Bool>( arm + "/" +controller_to_use + std::string("/start_controller"), 1);
+  ROS_INFO_STREAM("[trik_controller] Using " << arm << " arm");
+  ROS_INFO_STREAM("[trik_controller] Using " << controller << " controller");
 
-  ros::ServiceServer srv_enable = n.advertiseService("enable", cb_enable);
-  ros::ServiceServer srv_disable = n.advertiseService("disable", cb_disable);
-  ros::ServiceServer srv_is_enable = n.advertiseService("is_enabled", cb_is_enable);
+  srv_c_sw = n.serviceClient<controller_manager_msgs::SwitchController>( "/" + arm + std::string("/controller_manager/switch_controller"));
+  srv_c_l = n.serviceClient<controller_manager_msgs::ListControllers>( "/" + arm + std::string("/controller_manager/list_controllers"));
+  pub_activate_control = n.advertise<std_msgs::Bool>( "/" + arm + "/" +controller + std::string("/start_controller"), 1);
+
+  ros::ServiceServer srv_enable = n.advertiseService("/enable", cb_enable);
+  ros::ServiceServer srv_disable = n.advertiseService("/disable", cb_disable);
+  ros::ServiceServer srv_is_enable = n.advertiseService("/is_enabled", cb_is_enable);
   ros::spinOnce();
 
   controller_manager_msgs::ListControllers list_c;
